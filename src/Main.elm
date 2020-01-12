@@ -1,18 +1,15 @@
--- Press a button to send a GET request for random cat GIFs.
---
--- Read how it works:
---   https://guide.elm-lang.org/effects/json.html
---
+-- Show how many hours have passed since the last time Jack has flaked.
 
 
-module Main exposing (Model(..), Msg(..), getRandomCatGif, gifDecoder, init, main, subscriptions, update, view, viewGif)
+module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
 
 import Browser
+import Duration exposing (from, inSeconds)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Http
-import Json.Decode exposing (Decoder, field, string)
+import String
+import Task
+import Time exposing (..)
 
 
 
@@ -32,15 +29,25 @@ main =
 -- MODEL
 
 
-type Model
-    = Failure
-    | Loading
-    | Success String
+type alias Model =
+    { zone : Maybe Time.Zone
+    , currentTime : Maybe Time.Posix
+    , lastFlakeTime : Time.Posix
+    }
+
+
+type alias LoadedModel =
+    { zone : Time.Zone
+    , currentTime : Time.Posix
+    , lastFlakeTime : Time.Posix
+    }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Loading, getRandomCatGif )
+    ( Model Nothing Nothing (millisToPosix 1578254400000)
+    , Task.perform AdjustTimeZone Time.here
+    )
 
 
 
@@ -48,23 +55,18 @@ init _ =
 
 
 type Msg
-    = MorePlease
-    | GotGif (Result Http.Error String)
+    = Tick Time.Posix
+    | AdjustTimeZone Time.Zone
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        MorePlease ->
-            ( Loading, getRandomCatGif )
+        Tick newTime ->
+            ( { model | currentTime = Just newTime }, Cmd.none )
 
-        GotGif result ->
-            case result of
-                Ok url ->
-                    ( Success url, Cmd.none )
-
-                Err _ ->
-                    ( Failure, Cmd.none )
+        AdjustTimeZone newZone ->
+            ( { model | zone = Just newZone }, Cmd.none )
 
 
 
@@ -73,7 +75,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Time.every 1000 Tick
 
 
 
@@ -82,43 +84,33 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h2 [] [ text "Random Cats" ]
-        , viewGif model
+    case model.zone of
+        Nothing ->
+            h1 [] [ text "Loading..." ]
+
+        Just zone ->
+            case model.currentTime of
+                Nothing ->
+                    h1 [] [ text "Loading..." ]
+
+                Just currentTime ->
+                    showLoadedModel (LoadedModel zone currentTime model.lastFlakeTime)
+
+
+showLoadedModel : LoadedModel -> Html a
+showLoadedModel loadedModel =
+    let
+        flakeDuration =
+            from loadedModel.lastFlakeTime loadedModel.currentTime
+
+        secondsSince =
+            flakeDuration
+                |> inSeconds
+                |> round
+                |> String.fromInt
+    in
+    div
+        []
+        [ h1 [] [ text "Seconds since Jack's last flaked:" ]
+        , h1 [] [ text secondsSince ]
         ]
-
-
-viewGif : Model -> Html Msg
-viewGif model =
-    case model of
-        Failure ->
-            div []
-                [ text "I could not load a random cat for some reason. "
-                , button [ onClick MorePlease ] [ text "Try Again!" ]
-                ]
-
-        Loading ->
-            text "Loading..."
-
-        Success url ->
-            div []
-                [ button [ onClick MorePlease, style "display" "block" ] [ text "More Please!" ]
-                , img [ src url ] []
-                ]
-
-
-
--- HTTP
-
-
-getRandomCatGif : Cmd Msg
-getRandomCatGif =
-    Http.get
-        { url = "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=cat"
-        , expect = Http.expectJson GotGif gifDecoder
-        }
-
-
-gifDecoder : Decoder String
-gifDecoder =
-    field "data" (field "image_url" string)
