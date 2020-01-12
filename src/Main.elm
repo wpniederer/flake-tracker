@@ -104,6 +104,11 @@ wholeAndFractional value =
     ( floored, value - toFloat floored )
 
 
+displayTimeComponent : ( Int, String ) -> String
+displayTimeComponent ( rawTime, timePart ) =
+    String.fromInt rawTime ++ " " ++ timePart
+
+
 showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
     let
@@ -124,6 +129,6 @@ showLoadedModel loadedModel =
     div
         []
         [ h1 [] [ text "Time since Jack's last flaked:" ]
-        , h1 [] [ text (String.fromInt minutesSince ++ " minutes") ]
-        , h1 [] [ text (String.fromInt secondsSince ++ " seconds") ]
+        , h1 [] [ text (displayTimeComponent ( minutesSince, "minutes" )) ]
+        , h1 [] [ text (displayTimeComponent ( secondsSince, "seconds" )) ]
         ]
