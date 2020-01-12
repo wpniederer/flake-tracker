@@ -30,8 +30,8 @@ main =
 
 
 type alias Model =
-    { zone : Maybe Time.Zone
-    , currentTime : Maybe Time.Posix
+    { maybeZone : Maybe Time.Zone
+    , maybeCurrentTime : Maybe Time.Posix
     , lastFlakeTime : Time.Posix
     }
 
@@ -63,10 +63,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick newTime ->
-            ( { model | currentTime = Just newTime }, Cmd.none )
+            ( { model | maybeCurrentTime = Just newTime }, Cmd.none )
 
         AdjustTimeZone newZone ->
-            ( { model | zone = Just newZone }, Cmd.none )
+            ( { model | maybeZone = Just newZone }, Cmd.none )
 
 
 
@@ -82,16 +82,21 @@ subscriptions model =
 -- VIEW
 
 
+loadingMessage : Html a
+loadingMessage =
+    h1 [] [ text "Loading..." ]
+
+
 view : Model -> Html Msg
 view model =
-    case model.zone of
+    case model.maybeZone of
         Nothing ->
-            h1 [] [ text "Loading..." ]
+            loadingMessage
 
         Just zone ->
-            case model.currentTime of
+            case model.maybeCurrentTime of
                 Nothing ->
-                    h1 [] [ text "Loading..." ]
+                    loadingMessage
 
                 Just currentTime ->
                     showLoadedModel (LoadedModel zone currentTime model.lastFlakeTime)
