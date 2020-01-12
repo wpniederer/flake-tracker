@@ -30,24 +30,20 @@ main =
 
 
 type alias Model =
-    { maybeZone : Maybe Time.Zone
-    , maybeCurrentTime : Maybe Time.Posix
+    { maybeCurrentTime : Maybe Time.Posix
     , lastFlakeTime : Time.Posix
     }
 
 
 type alias LoadedModel =
-    { zone : Time.Zone
-    , currentTime : Time.Posix
+    { currentTime : Time.Posix
     , lastFlakeTime : Time.Posix
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( Model Nothing Nothing (millisToPosix 1578254400000)
-    , Task.perform AdjustTimeZone Time.here
-    )
+init : Model
+init =
+    Model Nothing (millisToPosix 1578254400000)
 
 
 
@@ -56,17 +52,13 @@ init _ =
 
 type Msg
     = Tick Time.Posix
-    | AdjustTimeZone Time.Zone
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> Model
 update msg model =
     case msg of
         Tick newTime ->
-            ( { model | maybeCurrentTime = Just newTime }, Cmd.none )
-
-        AdjustTimeZone newZone ->
-            ( { model | maybeZone = Just newZone }, Cmd.none )
+            { model | maybeCurrentTime = Just newTime }
 
 
 
@@ -89,17 +81,12 @@ loadingMessage =
 
 view : Model -> Html Msg
 view model =
-    case model.maybeZone of
+    case model.maybeCurrentTime of
         Nothing ->
             loadingMessage
 
-        Just zone ->
-            case model.maybeCurrentTime of
-                Nothing ->
-                    loadingMessage
-
-                Just currentTime ->
-                    showLoadedModel (LoadedModel zone currentTime model.lastFlakeTime)
+        Just currentTime ->
+            showLoadedModel (LoadedModel currentTime model.lastFlakeTime)
 
 
 showLoadedModel : LoadedModel -> Html a
