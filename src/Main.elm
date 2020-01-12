@@ -4,7 +4,7 @@
 module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
 
 import Browser
-import Duration exposing (from, inSeconds)
+import Duration exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
@@ -41,9 +41,9 @@ type alias LoadedModel =
     }
 
 
-init : Model
-init =
-    Model Nothing (millisToPosix 1578254400000)
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model Nothing (millisToPosix 1578254400000), Cmd.none )
 
 
 
@@ -54,11 +54,11 @@ type Msg
     = Tick Time.Posix
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick newTime ->
-            { model | maybeCurrentTime = Just newTime }
+            ( { model | maybeCurrentTime = Just newTime }, Cmd.none )
 
 
 
@@ -89,20 +89,41 @@ view model =
             showLoadedModel (LoadedModel currentTime model.lastFlakeTime)
 
 
+{-| Returns the floor of the input value and the input value minus its floor.
+Precondition: input value must be positive.
+
+    wholeAndFractional 1.5 == (1, .5)
+
+-}
+wholeAndFractional : Float -> ( Int, Float )
+wholeAndFractional value =
+    let
+        floored =
+            floor value
+    in
+    ( floored, value - toFloat floored )
+
+
 showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
     let
         flakeDuration =
             from loadedModel.lastFlakeTime loadedModel.currentTime
 
-        secondsSince =
+        ( minutesSince, leftoverMinutes ) =
             flakeDuration
+                |> inMinutes
+                |> wholeAndFractional
+
+        ( secondsSince, _ ) =
+            leftoverMinutes
+                |> minutes
                 |> inSeconds
-                |> round
-                |> String.fromInt
+                |> wholeAndFractional
     in
     div
         []
-        [ h1 [] [ text "Seconds since Jack's last flaked:" ]
-        , h1 [] [ text secondsSince ]
+        [ h1 [] [ text "Time since Jack's last flaked:" ]
+        , h1 [] [ text (String.fromInt minutesSince ++ " minutes") ]
+        , h1 [] [ text (String.fromInt secondsSince ++ " seconds") ]
         ]
