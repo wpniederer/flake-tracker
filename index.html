@@ -5664,13 +5664,25 @@ var $author$project$Main$loadingMessage = A2(
 		[
 			$elm$html$Html$text('Loading...')
 		]));
-var $elm$html$Html$div = _VirtualDom_node('div');
+var $ianmackenzie$elm_units$Constants$second = 1;
+var $ianmackenzie$elm_units$Constants$minute = 60 * $ianmackenzie$elm_units$Constants$second;
+var $ianmackenzie$elm_units$Constants$hour = 60 * $ianmackenzie$elm_units$Constants$minute;
+var $ianmackenzie$elm_units$Constants$day = 24 * $ianmackenzie$elm_units$Constants$hour;
 var $ianmackenzie$elm_units$Quantity$Quantity = function (a) {
 	return {$: 'Quantity', a: a};
 };
 var $ianmackenzie$elm_units$Duration$seconds = function (numSeconds) {
 	return $ianmackenzie$elm_units$Quantity$Quantity(numSeconds);
 };
+var $ianmackenzie$elm_units$Duration$days = function (numDays) {
+	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$day * numDays);
+};
+var $author$project$Main$displayTimeComponent = function (_v0) {
+	var rawTime = _v0.a;
+	var timePart = _v0.b;
+	return $elm$core$String$fromInt(rawTime) + (' ' + timePart);
+};
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $ianmackenzie$elm_units$Duration$milliseconds = function (numMilliseconds) {
 	return $ianmackenzie$elm_units$Duration$seconds(0.001 * numMilliseconds);
 };
@@ -5683,15 +5695,31 @@ var $ianmackenzie$elm_units$Duration$from = F2(
 		var numMilliseconds = $elm$time$Time$posixToMillis(endTime) - $elm$time$Time$posixToMillis(startTime);
 		return $ianmackenzie$elm_units$Duration$milliseconds(numMilliseconds);
 	});
+var $ianmackenzie$elm_units$Duration$hours = function (numHours) {
+	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$hour * numHours);
+};
 var $ianmackenzie$elm_units$Duration$inSeconds = function (_v0) {
 	var numSeconds = _v0.a;
 	return numSeconds;
 };
+var $ianmackenzie$elm_units$Duration$inDays = function (duration) {
+	return $ianmackenzie$elm_units$Duration$inSeconds(duration) / $ianmackenzie$elm_units$Constants$day;
+};
+var $ianmackenzie$elm_units$Duration$inHours = function (duration) {
+	return $ianmackenzie$elm_units$Duration$inSeconds(duration) / $ianmackenzie$elm_units$Constants$hour;
+};
 var $ianmackenzie$elm_units$Duration$inMinutes = function (duration) {
 	return $ianmackenzie$elm_units$Duration$inSeconds(duration) / 60;
 };
+var $ianmackenzie$elm_units$Constants$week = 7 * $ianmackenzie$elm_units$Constants$day;
+var $ianmackenzie$elm_units$Duration$inWeeks = function (duration) {
+	return $ianmackenzie$elm_units$Duration$inSeconds(duration) / $ianmackenzie$elm_units$Constants$week;
+};
 var $ianmackenzie$elm_units$Duration$minutes = function (numMinutes) {
 	return $ianmackenzie$elm_units$Duration$seconds(60 * numMinutes);
+};
+var $ianmackenzie$elm_units$Duration$weeks = function (numWeeks) {
+	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$week * numWeeks);
 };
 var $author$project$Main$wholeAndFractional = function (value) {
 	var floored = $elm$core$Basics$floor(value);
@@ -5700,13 +5728,28 @@ var $author$project$Main$wholeAndFractional = function (value) {
 var $author$project$Main$showLoadedModel = function (loadedModel) {
 	var flakeDuration = A2($ianmackenzie$elm_units$Duration$from, loadedModel.lastFlakeTime, loadedModel.currentTime);
 	var _v0 = $author$project$Main$wholeAndFractional(
-		$ianmackenzie$elm_units$Duration$inMinutes(flakeDuration));
-	var minutesSince = _v0.a;
-	var leftoverMinutes = _v0.b;
+		$ianmackenzie$elm_units$Duration$inWeeks(flakeDuration));
+	var weeksSince = _v0.a;
+	var leftoverWeeks = _v0.b;
 	var _v1 = $author$project$Main$wholeAndFractional(
+		$ianmackenzie$elm_units$Duration$inDays(
+			$ianmackenzie$elm_units$Duration$weeks(leftoverWeeks)));
+	var dayz = _v1.a;
+	var leftoverDays = _v1.b;
+	var _v2 = $author$project$Main$wholeAndFractional(
+		$ianmackenzie$elm_units$Duration$inHours(
+			$ianmackenzie$elm_units$Duration$days(leftoverDays)));
+	var hourz = _v2.a;
+	var leftoverHours = _v2.b;
+	var _v3 = $author$project$Main$wholeAndFractional(
+		$ianmackenzie$elm_units$Duration$inMinutes(
+			$ianmackenzie$elm_units$Duration$hours(leftoverHours)));
+	var minutez = _v3.a;
+	var leftoverMinutes = _v3.b;
+	var _v4 = $author$project$Main$wholeAndFractional(
 		$ianmackenzie$elm_units$Duration$inSeconds(
 			$ianmackenzie$elm_units$Duration$minutes(leftoverMinutes)));
-	var secondsSince = _v1.a;
+	var secondz = _v4.a;
 	return A2(
 		$elm$html$Html$div,
 		_List_Nil,
@@ -5717,7 +5760,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Time since Jack\'s last flaked:')
+						$elm$html$Html$text('Time since Jack last flaked:')
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5725,7 +5768,8 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						$elm$core$String$fromInt(minutesSince) + ' minutes')
+						$author$project$Main$displayTimeComponent(
+							_Utils_Tuple2(weeksSince, 'weeks')))
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5733,7 +5777,35 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						$elm$core$String$fromInt(secondsSince) + ' seconds')
+						$author$project$Main$displayTimeComponent(
+							_Utils_Tuple2(dayz, 'days')))
+					])),
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$author$project$Main$displayTimeComponent(
+							_Utils_Tuple2(hourz, 'hours')))
+					])),
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$author$project$Main$displayTimeComponent(
+							_Utils_Tuple2(minutez, 'minutes')))
+					])),
+				A2(
+				$elm$html$Html$h1,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$author$project$Main$displayTimeComponent(
+							_Utils_Tuple2(secondz, 'seconds')))
 					]))
 			]));
 };

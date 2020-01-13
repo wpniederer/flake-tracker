@@ -104,6 +104,11 @@ wholeAndFractional value =
     ( floored, value - toFloat floored )
 
 
+{-| Returns a unit of time with its respective value
+
+        displayTimeComponent ( 33, "minutes" ) == "33 minutes"
+
+-}
 displayTimeComponent : ( Int, String ) -> String
 displayTimeComponent ( rawTime, timePart ) =
     String.fromInt rawTime ++ " " ++ timePart
@@ -115,12 +120,30 @@ showLoadedModel loadedModel =
         flakeDuration =
             from loadedModel.lastFlakeTime loadedModel.currentTime
 
-        ( minutesSince, leftoverMinutes ) =
+        ( weeksSince, leftoverWeeks ) =
             flakeDuration
+                |> inWeeks
+                |> wholeAndFractional
+
+        ( dayz, leftoverDays ) =
+            leftoverWeeks
+                |> weeks
+                |> inDays
+                |> wholeAndFractional
+
+        ( hourz, leftoverHours ) =
+            leftoverDays
+                |> days
+                |> inHours
+                |> wholeAndFractional
+
+        ( minutez, leftoverMinutes ) =
+            leftoverHours
+                |> hours
                 |> inMinutes
                 |> wholeAndFractional
 
-        ( secondsSince, _ ) =
+        ( secondz, _ ) =
             leftoverMinutes
                 |> minutes
                 |> inSeconds
@@ -128,7 +151,10 @@ showLoadedModel loadedModel =
     in
     div
         []
-        [ h1 [] [ text "Time since Jack's last flaked:" ]
-        , h1 [] [ text (displayTimeComponent ( minutesSince, "minutes" )) ]
-        , h1 [] [ text (displayTimeComponent ( secondsSince, "seconds" )) ]
+        [ h1 [] [ text "Time since Jack last flaked:" ]
+        , h1 [] [ text (displayTimeComponent ( weeksSince, "weeks" )) ]
+        , h1 [] [ text (displayTimeComponent ( dayz, "days" )) ]
+        , h1 [] [ text (displayTimeComponent ( hourz, "hours" )) ]
+        , h1 [] [ text (displayTimeComponent ( minutez, "minutes" )) ]
+        , h1 [] [ text (displayTimeComponent ( secondz, "seconds" )) ]
         ]
