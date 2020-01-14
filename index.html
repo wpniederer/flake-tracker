@@ -5680,7 +5680,7 @@ var $ianmackenzie$elm_units$Duration$days = function (numDays) {
 var $author$project$Main$displayTimeComponent = function (_v0) {
 	var rawTime = _v0.a;
 	var timePart = _v0.b;
-	return $elm$core$String$fromInt(rawTime) + (' ' + timePart);
+	return (rawTime > 1) ? ($elm$core$String$fromInt(rawTime) + (' ' + (timePart + 's'))) : ($elm$core$String$fromInt(rawTime) + (' ' + timePart));
 };
 var $elm$html$Html$div = _VirtualDom_node('div');
 var $ianmackenzie$elm_units$Duration$milliseconds = function (numMilliseconds) {
@@ -5769,7 +5769,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 					[
 						$elm$html$Html$text(
 						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(weeksSince, 'weeks')))
+							_Utils_Tuple2(weeksSince, 'week')))
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5778,7 +5778,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 					[
 						$elm$html$Html$text(
 						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(dayz, 'days')))
+							_Utils_Tuple2(dayz, 'day')))
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5787,7 +5787,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 					[
 						$elm$html$Html$text(
 						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(hourz, 'hours')))
+							_Utils_Tuple2(hourz, 'hour')))
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5796,7 +5796,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 					[
 						$elm$html$Html$text(
 						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(minutez, 'minutes')))
+							_Utils_Tuple2(minutez, 'minute')))
 					])),
 				A2(
 				$elm$html$Html$h1,
@@ -5805,7 +5805,7 @@ var $author$project$Main$showLoadedModel = function (loadedModel) {
 					[
 						$elm$html$Html$text(
 						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(secondz, 'seconds')))
+							_Utils_Tuple2(secondz, 'second')))
 					]))
 			]));
 };

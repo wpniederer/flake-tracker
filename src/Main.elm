@@ -111,7 +111,11 @@ wholeAndFractional value =
 -}
 displayTimeComponent : ( Int, String ) -> String
 displayTimeComponent ( rawTime, timePart ) =
-    String.fromInt rawTime ++ " " ++ timePart
+    if rawTime > 1 then
+        String.fromInt rawTime ++ " " ++ timePart ++ "s"
+
+    else
+        String.fromInt rawTime ++ " " ++ timePart
 
 
 showLoadedModel : LoadedModel -> Html a
@@ -152,9 +156,9 @@ showLoadedModel loadedModel =
     div
         []
         [ h1 [] [ text "Time since Jack last flaked:" ]
-        , h1 [] [ text (displayTimeComponent ( weeksSince, "weeks" )) ]
-        , h1 [] [ text (displayTimeComponent ( dayz, "days" )) ]
-        , h1 [] [ text (displayTimeComponent ( hourz, "hours" )) ]
-        , h1 [] [ text (displayTimeComponent ( minutez, "minutes" )) ]
-        , h1 [] [ text (displayTimeComponent ( secondz, "seconds" )) ]
+        , h1 [] [ text (displayTimeComponent ( weeksSince, "week" )) ]
+        , h1 [] [ text (displayTimeComponent ( dayz, "day" )) ]
+        , h1 [] [ text (displayTimeComponent ( hourz, "hour" )) ]
+        , h1 [] [ text (displayTimeComponent ( minutez, "minute" )) ]
+        , h1 [] [ text (displayTimeComponent ( secondz, "second" )) ]
         ]
