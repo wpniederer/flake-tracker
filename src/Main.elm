@@ -106,16 +106,16 @@ wholeAndFractional value =
 
 {-| Returns a unit of time with its respective value
 
-        displayTimeComponent ( 33, "minutes" ) == "33 minutes"
+        displayTimeComponent ( 33, "minute" ) == "33 minutes"
 
 -}
 displayTimeComponent : ( Int, String ) -> String
 displayTimeComponent ( rawTime, timePart ) =
-    if rawTime > 1 then
-        String.fromInt rawTime ++ " " ++ timePart ++ "s"
+    if rawTime == 1 then
+        String.fromInt rawTime ++ " " ++ timePart
 
     else
-        String.fromInt rawTime ++ " " ++ timePart
+        String.fromInt rawTime ++ " " ++ timePart ++ "s"
 
 
 showLoadedModel : LoadedModel -> Html a
