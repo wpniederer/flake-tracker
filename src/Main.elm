@@ -5,6 +5,7 @@ module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, 
 
 import Browser
 import Duration exposing (..)
+import FlakerInfo exposing (FlakerInfo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
@@ -31,19 +32,19 @@ main =
 
 type alias Model =
     { maybeCurrentTime : Maybe Time.Posix
-    , lastFlakeTime : Time.Posix
+    , flakerInfo : FlakerInfo
     }
 
 
 type alias LoadedModel =
     { currentTime : Time.Posix
-    , lastFlakeTime : Time.Posix
+    , flakerInfo : FlakerInfo
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing (millisToPosix 1578254400000), Cmd.none )
+    ( Model Nothing { name = "Jack Pfieffer", lastFlakeTime = millisToPosix 1578254400000 }, Cmd.none )
 
 
 
@@ -86,7 +87,7 @@ view model =
             loadingMessage
 
         Just currentTime ->
-            showLoadedModel (LoadedModel currentTime model.lastFlakeTime)
+            showLoadedModel (LoadedModel currentTime model.flakerInfo)
 
 
 {-| Returns the floor of the input value and the input value minus its floor.
@@ -122,7 +123,7 @@ showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
     let
         flakeDuration =
-            from loadedModel.lastFlakeTime loadedModel.currentTime
+            from loadedModel.flakerInfo.lastFlakeTime loadedModel.currentTime
 
         ( weeksSince, leftoverWeeks ) =
             flakeDuration
@@ -155,7 +156,7 @@ showLoadedModel loadedModel =
     in
     div
         []
-        [ h1 [] [ text "Time since Jack last flaked:" ]
+        [ h1 [] [ text ("Time since " ++ loadedModel.flakerInfo.name ++ " last flaked:") ]
         , h1 [] [ text (displayTimeComponent ( weeksSince, "week" )) ]
         , h1 [] [ text (displayTimeComponent ( dayz, "day" )) ]
         , h1 [] [ text (displayTimeComponent ( hourz, "hour" )) ]
