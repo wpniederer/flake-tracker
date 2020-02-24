@@ -116,10 +116,10 @@ showLoadedModel loadedModel =
     in
     div
         []
-        [ h1 [] [ text ("Time since " ++ loadedModel.flakerInfo.name ++ " last flaked:") ]
-        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.weeks, "week" )) ]
-        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.days, "day" )) ]
-        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.hours, "hour" )) ]
-        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.minutes, "minute" )) ]
-        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.seconds, "second" )) ]
+        [ h1 [] [ text <| "Time since " ++ loadedModel.flakerInfo.name ++ " last flaked:" ]
+        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.weeks, "week" ) ]
+        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.days, "day" ) ]
+        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.hours, "hour" ) ]
+        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ) ]
+        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ) ]
         ]
