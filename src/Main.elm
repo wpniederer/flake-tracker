@@ -4,13 +4,14 @@
 module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
 
 import Browser
-import Duration exposing (..)
+import Duration
 import FlakerInfo exposing (FlakerInfo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
 import Task
-import Time exposing (..)
+import Time
+import TimeUtil
 
 
 
@@ -44,7 +45,7 @@ type alias LoadedModel =
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing { name = "Jack Pfieffer", lastFlakeTime = millisToPosix 1578254400000 }, Cmd.none )
+    ( Model Nothing { name = "Jack Pfieffer", lastFlakeTime = Time.millisToPosix 1578254400000 }, Cmd.none )
 
 
 
@@ -90,21 +91,6 @@ view model =
             showLoadedModel (LoadedModel currentTime model.flakerInfo)
 
 
-{-| Returns the floor of the input value and the input value minus its floor.
-Precondition: input value must be positive.
-
-    wholeAndFractional 1.5 == (1, .5)
-
--}
-wholeAndFractional : Float -> ( Int, Float )
-wholeAndFractional value =
-    let
-        floored =
-            floor value
-    in
-    ( floored, value - toFloat floored )
-
-
 {-| Returns a unit of time with its respective value
 
         displayTimeComponent ( 33, "minute" ) == "33 minutes"
@@ -123,43 +109,17 @@ showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
     let
         flakeDuration =
-            from loadedModel.flakerInfo.lastFlakeTime loadedModel.currentTime
+            Duration.from loadedModel.flakerInfo.lastFlakeTime loadedModel.currentTime
 
-        ( weeksSince, leftoverWeeks ) =
-            flakeDuration
-                |> inWeeks
-                |> wholeAndFractional
-
-        ( dayz, leftoverDays ) =
-            leftoverWeeks
-                |> weeks
-                |> inDays
-                |> wholeAndFractional
-
-        ( hourz, leftoverHours ) =
-            leftoverDays
-                |> days
-                |> inHours
-                |> wholeAndFractional
-
-        ( minutez, leftoverMinutes ) =
-            leftoverHours
-                |> hours
-                |> inMinutes
-                |> wholeAndFractional
-
-        ( secondz, _ ) =
-            leftoverMinutes
-                |> minutes
-                |> inSeconds
-                |> wholeAndFractional
+        cumulativeDurations =
+            TimeUtil.cumulativeDurations flakeDuration
     in
     div
         []
         [ h1 [] [ text ("Time since " ++ loadedModel.flakerInfo.name ++ " last flaked:") ]
-        , h1 [] [ text (displayTimeComponent ( weeksSince, "week" )) ]
-        , h1 [] [ text (displayTimeComponent ( dayz, "day" )) ]
-        , h1 [] [ text (displayTimeComponent ( hourz, "hour" )) ]
-        , h1 [] [ text (displayTimeComponent ( minutez, "minute" )) ]
-        , h1 [] [ text (displayTimeComponent ( secondz, "second" )) ]
+        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.weeks, "week" )) ]
+        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.days, "day" )) ]
+        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.hours, "hour" )) ]
+        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.minutes, "minute" )) ]
+        , h1 [] [ text (displayTimeComponent ( cumulativeDurations.seconds, "second" )) ]
         ]
