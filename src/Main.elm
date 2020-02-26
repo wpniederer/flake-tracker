@@ -93,9 +93,11 @@ view model =
             loadingMessage
 
         Just currentTime ->
-            showLoadedModel (LoadedModel currentTime model.flakerInfos)
+            viewLoadedModel (LoadedModel currentTime model.flakerInfos)
 
 
-showLoadedModel : LoadedModel -> Html a
-showLoadedModel loadedModel =
+{-| View a LoadedModel.
+-}
+viewLoadedModel : LoadedModel -> Html a
+viewLoadedModel loadedModel =
     FlakerInfo.viewFlakerInfoList loadedModel.flakerInfos loadedModel.currentTime
