@@ -5205,8 +5205,8 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$element = _Browser_element;
 var $author$project$Main$Model = F2(
-	function (maybeCurrentTime, flakerInfo) {
-		return {flakerInfo: flakerInfo, maybeCurrentTime: maybeCurrentTime};
+	function (maybeCurrentTime, flakerInfos) {
+		return {flakerInfos: flakerInfos, maybeCurrentTime: maybeCurrentTime};
 	});
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
@@ -5219,10 +5219,17 @@ var $author$project$Main$init = function (_v0) {
 		A2(
 			$author$project$Main$Model,
 			$elm$core$Maybe$Nothing,
-			{
-				lastFlakeTime: $elm$time$Time$millisToPosix(1578254400000),
-				name: 'Jack Pfieffer'
-			}),
+			_List_fromArray(
+				[
+					{
+					lastFlakeTime: $elm$time$Time$millisToPosix(1578254400000),
+					name: 'Jack Pfieffer'
+				},
+					{
+					lastFlakeTime: $elm$time$Time$millisToPosix(1582270200000),
+					name: 'Jason Kim'
+				}
+				])),
 		$elm$core$Platform$Cmd$none);
 };
 var $author$project$Main$Tick = function (a) {
@@ -5654,8 +5661,8 @@ var $author$project$Main$update = F2(
 			$elm$core$Platform$Cmd$none);
 	});
 var $author$project$Main$LoadedModel = F2(
-	function (currentTime, flakerInfo) {
-		return {currentTime: currentTime, flakerInfo: flakerInfo};
+	function (currentTime, flakerInfos) {
+		return {currentTime: currentTime, flakerInfos: flakerInfos};
 	});
 var $elm$html$Html$h1 = _VirtualDom_node('h1');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -5667,6 +5674,16 @@ var $author$project$Main$loadingMessage = A2(
 		[
 			$elm$html$Html$text('Loading...')
 		]));
+var $author$project$FlakerInfo$flip = F3(
+	function (f, y, x) {
+		return A2(f, x, y);
+	});
+var $elm$html$Html$li = _VirtualDom_node('li');
+var $elm$core$List$singleton = function (value) {
+	return _List_fromArray(
+		[value]);
+};
+var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $ianmackenzie$elm_units$Constants$second = 1;
 var $ianmackenzie$elm_units$Constants$minute = 60 * $ianmackenzie$elm_units$Constants$second;
 var $ianmackenzie$elm_units$Constants$hour = 60 * $ianmackenzie$elm_units$Constants$minute;
@@ -5680,24 +5697,6 @@ var $ianmackenzie$elm_units$Duration$seconds = function (numSeconds) {
 var $ianmackenzie$elm_units$Duration$days = function (numDays) {
 	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$day * numDays);
 };
-var $author$project$Main$displayTimeComponent = function (_v0) {
-	var rawTime = _v0.a;
-	var timePart = _v0.b;
-	return (rawTime === 1) ? ($elm$core$String$fromInt(rawTime) + (' ' + timePart)) : ($elm$core$String$fromInt(rawTime) + (' ' + (timePart + 's')));
-};
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $ianmackenzie$elm_units$Duration$milliseconds = function (numMilliseconds) {
-	return $ianmackenzie$elm_units$Duration$seconds(0.001 * numMilliseconds);
-};
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
-var $ianmackenzie$elm_units$Duration$from = F2(
-	function (startTime, endTime) {
-		var numMilliseconds = $elm$time$Time$posixToMillis(endTime) - $elm$time$Time$posixToMillis(startTime);
-		return $ianmackenzie$elm_units$Duration$milliseconds(numMilliseconds);
-	});
 var $ianmackenzie$elm_units$Duration$hours = function (numHours) {
 	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$hour * numHours);
 };
@@ -5724,93 +5723,135 @@ var $ianmackenzie$elm_units$Duration$minutes = function (numMinutes) {
 var $ianmackenzie$elm_units$Duration$weeks = function (numWeeks) {
 	return $ianmackenzie$elm_units$Duration$seconds($ianmackenzie$elm_units$Constants$week * numWeeks);
 };
-var $author$project$Main$wholeAndFractional = function (value) {
+var $author$project$TimeUtil$wholeAndFractional = function (value) {
 	var floored = $elm$core$Basics$floor(value);
 	return _Utils_Tuple2(floored, value - floored);
 };
-var $author$project$Main$showLoadedModel = function (loadedModel) {
-	var flakeDuration = A2($ianmackenzie$elm_units$Duration$from, loadedModel.flakerInfo.lastFlakeTime, loadedModel.currentTime);
-	var _v0 = $author$project$Main$wholeAndFractional(
-		$ianmackenzie$elm_units$Duration$inWeeks(flakeDuration));
-	var weeksSince = _v0.a;
+var $author$project$TimeUtil$cumulativeDurations = function (duration) {
+	var _v0 = $author$project$TimeUtil$wholeAndFractional(
+		$ianmackenzie$elm_units$Duration$inWeeks(duration));
+	var weeks = _v0.a;
 	var leftoverWeeks = _v0.b;
-	var _v1 = $author$project$Main$wholeAndFractional(
+	var _v1 = $author$project$TimeUtil$wholeAndFractional(
 		$ianmackenzie$elm_units$Duration$inDays(
 			$ianmackenzie$elm_units$Duration$weeks(leftoverWeeks)));
-	var dayz = _v1.a;
+	var days = _v1.a;
 	var leftoverDays = _v1.b;
-	var _v2 = $author$project$Main$wholeAndFractional(
+	var _v2 = $author$project$TimeUtil$wholeAndFractional(
 		$ianmackenzie$elm_units$Duration$inHours(
 			$ianmackenzie$elm_units$Duration$days(leftoverDays)));
-	var hourz = _v2.a;
+	var hours = _v2.a;
 	var leftoverHours = _v2.b;
-	var _v3 = $author$project$Main$wholeAndFractional(
+	var _v3 = $author$project$TimeUtil$wholeAndFractional(
 		$ianmackenzie$elm_units$Duration$inMinutes(
 			$ianmackenzie$elm_units$Duration$hours(leftoverHours)));
-	var minutez = _v3.a;
+	var minutes = _v3.a;
 	var leftoverMinutes = _v3.b;
-	var _v4 = $author$project$Main$wholeAndFractional(
+	var _v4 = $author$project$TimeUtil$wholeAndFractional(
 		$ianmackenzie$elm_units$Duration$inSeconds(
 			$ianmackenzie$elm_units$Duration$minutes(leftoverMinutes)));
-	var secondz = _v4.a;
-	return A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
+	var seconds = _v4.a;
+	return {days: days, hours: hours, minutes: minutes, seconds: seconds, weeks: weeks};
+};
+var $author$project$FlakerInfo$displayTimeComponent = function (_v0) {
+	var rawTime = _v0.a;
+	var timePart = _v0.b;
+	return (rawTime === 1) ? ($elm$core$String$fromInt(rawTime) + (' ' + timePart)) : ($elm$core$String$fromInt(rawTime) + (' ' + (timePart + 's')));
+};
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $ianmackenzie$elm_units$Duration$milliseconds = function (numMilliseconds) {
+	return $ianmackenzie$elm_units$Duration$seconds(0.001 * numMilliseconds);
+};
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $ianmackenzie$elm_units$Duration$from = F2(
+	function (startTime, endTime) {
+		var numMilliseconds = $elm$time$Time$posixToMillis(endTime) - $elm$time$Time$posixToMillis(startTime);
+		return $ianmackenzie$elm_units$Duration$milliseconds(numMilliseconds);
+	});
+var $author$project$FlakerInfo$viewFlakerInfo = F2(
+	function (flakerInfo, currentTime) {
+		var flakeDuration = A2($ianmackenzie$elm_units$Duration$from, flakerInfo.lastFlakeTime, currentTime);
+		var cumulativeDurations = $author$project$TimeUtil$cumulativeDurations(flakeDuration);
+		return A2(
+			$elm$html$Html$div,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Time since ' + (flakerInfo.name + ' last flaked:'))
+						])),
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$FlakerInfo$displayTimeComponent(
+								_Utils_Tuple2(cumulativeDurations.weeks, 'week')))
+						])),
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$FlakerInfo$displayTimeComponent(
+								_Utils_Tuple2(cumulativeDurations.days, 'day')))
+						])),
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$FlakerInfo$displayTimeComponent(
+								_Utils_Tuple2(cumulativeDurations.hours, 'hour')))
+						])),
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$FlakerInfo$displayTimeComponent(
+								_Utils_Tuple2(cumulativeDurations.minutes, 'minute')))
+						])),
+					A2(
+					$elm$html$Html$h1,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$FlakerInfo$displayTimeComponent(
+								_Utils_Tuple2(cumulativeDurations.seconds, 'second')))
+						]))
+				]));
+	});
+var $author$project$FlakerInfo$viewFlakerInfoList = F2(
+	function (flakerInfos, currentTime) {
+		return A2(
+			$elm$html$Html$ul,
+			_List_Nil,
+			A2(
+				$elm$core$List$map,
 				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Time since ' + (loadedModel.flakerInfo.name + ' last flaked:'))
-					])),
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(weeksSince, 'week')))
-					])),
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(dayz, 'day')))
-					])),
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(hourz, 'hour')))
-					])),
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(minutez, 'minute')))
-					])),
-				A2(
-				$elm$html$Html$h1,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$author$project$Main$displayTimeComponent(
-							_Utils_Tuple2(secondz, 'second')))
-					]))
-			]));
+					$elm$core$Basics$composeL,
+					A2(
+						$elm$core$Basics$composeL,
+						$elm$html$Html$li(_List_Nil),
+						$elm$core$List$singleton),
+					A2($author$project$FlakerInfo$flip, $author$project$FlakerInfo$viewFlakerInfo, currentTime)),
+				flakerInfos));
+	});
+var $author$project$Main$viewLoadedModel = function (loadedModel) {
+	return A2($author$project$FlakerInfo$viewFlakerInfoList, loadedModel.flakerInfos, loadedModel.currentTime);
 };
 var $author$project$Main$view = function (model) {
 	var _v0 = model.maybeCurrentTime;
@@ -5818,8 +5859,8 @@ var $author$project$Main$view = function (model) {
 		return $author$project$Main$loadingMessage;
 	} else {
 		var currentTime = _v0.a;
-		return $author$project$Main$showLoadedModel(
-			A2($author$project$Main$LoadedModel, currentTime, model.flakerInfo));
+		return $author$project$Main$viewLoadedModel(
+			A2($author$project$Main$LoadedModel, currentTime, model.flakerInfos));
 	}
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

@@ -1,7 +1,7 @@
 -- Show how many hours have passed since the last time Jack has flaked.
 
 
-module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
+module Main exposing (main)
 
 import Browser
 import FlakerInfo exposing (FlakerInfo)
