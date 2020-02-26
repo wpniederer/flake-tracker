@@ -4,14 +4,12 @@
 module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
 
 import Browser
-import Duration
-import FlakerInfo exposing (FlakerInfo)
+import FlakerInfo
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import String
 import Task
 import Time
-import TimeUtil
 
 
 
@@ -33,13 +31,13 @@ main =
 
 type alias Model =
     { maybeCurrentTime : Maybe Time.Posix
-    , flakerInfo : FlakerInfo
+    , flakerInfo : FlakerInfo.FlakerInfo
     }
 
 
 type alias LoadedModel =
     { currentTime : Time.Posix
-    , flakerInfo : FlakerInfo
+    , flakerInfo : FlakerInfo.FlakerInfo
     }
 
 
@@ -91,35 +89,6 @@ view model =
             showLoadedModel (LoadedModel currentTime model.flakerInfo)
 
 
-{-| Returns a unit of time with its respective value
-
-        displayTimeComponent ( 33, "minute" ) == "33 minutes"
-
--}
-displayTimeComponent : ( Int, String ) -> String
-displayTimeComponent ( rawTime, timePart ) =
-    if rawTime == 1 then
-        String.fromInt rawTime ++ " " ++ timePart
-
-    else
-        String.fromInt rawTime ++ " " ++ timePart ++ "s"
-
-
 showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
-    let
-        flakeDuration =
-            Duration.from loadedModel.flakerInfo.lastFlakeTime loadedModel.currentTime
-
-        cumulativeDurations =
-            TimeUtil.cumulativeDurations flakeDuration
-    in
-    div
-        []
-        [ h1 [] [ text <| "Time since " ++ loadedModel.flakerInfo.name ++ " last flaked:" ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.weeks, "week" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.days, "day" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.hours, "hour" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ) ]
-        ]
+    FlakerInfo.viewFlakerInfo loadedModel.flakerInfo loadedModel.currentTime
