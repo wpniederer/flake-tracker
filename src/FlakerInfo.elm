@@ -1,8 +1,9 @@
-module FlakerInfo exposing (FlakerInfo, viewFlakerInfo)
+module FlakerInfo exposing (FlakerInfo, viewFlakerInfo, viewFlakerInfoList)
 
 import Duration
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import List
 import String
 import Time
 import TimeUtil
@@ -50,3 +51,22 @@ viewFlakerInfo flakerInfo currentTime =
         , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ) ]
         , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ) ]
         ]
+
+
+{-| Flips the first two arguments of a function.
+-}
+flip : (a -> b -> c) -> b -> a -> c
+flip f y x =
+    f x y
+
+
+{-| Returns a detailed view of the List FlakerInfo for the given time.
+-}
+viewFlakerInfoList : List FlakerInfo -> Time.Posix -> Html a
+viewFlakerInfoList flakerInfos currentTime =
+    ul
+        []
+        (List.map
+            (li [] << List.singleton << flip viewFlakerInfo currentTime)
+            flakerInfos
+        )

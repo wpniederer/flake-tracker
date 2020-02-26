@@ -4,9 +4,10 @@
 module Main exposing (LoadedModel, Model, Msg(..), init, main, showLoadedModel, subscriptions, update, view)
 
 import Browser
-import FlakerInfo
+import FlakerInfo exposing (FlakerInfo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import List
 import String
 import Task
 import Time
@@ -31,19 +32,25 @@ main =
 
 type alias Model =
     { maybeCurrentTime : Maybe Time.Posix
-    , flakerInfo : FlakerInfo.FlakerInfo
+    , flakerInfos : List FlakerInfo
     }
 
 
 type alias LoadedModel =
     { currentTime : Time.Posix
-    , flakerInfo : FlakerInfo.FlakerInfo
+    , flakerInfos : List FlakerInfo
     }
 
 
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( Model Nothing { name = "Jack Pfieffer", lastFlakeTime = Time.millisToPosix 1578254400000 }, Cmd.none )
+    ( Model
+        Nothing
+        [ { name = "Jack Pfieffer", lastFlakeTime = Time.millisToPosix 1578254400000 }
+        , { name = "Jason Kim", lastFlakeTime = Time.millisToPosix 1582270200000 }
+        ]
+    , Cmd.none
+    )
 
 
 
@@ -86,9 +93,9 @@ view model =
             loadingMessage
 
         Just currentTime ->
-            showLoadedModel (LoadedModel currentTime model.flakerInfo)
+            showLoadedModel (LoadedModel currentTime model.flakerInfos)
 
 
 showLoadedModel : LoadedModel -> Html a
 showLoadedModel loadedModel =
-    FlakerInfo.viewFlakerInfo loadedModel.flakerInfo loadedModel.currentTime
+    FlakerInfo.viewFlakerInfoList loadedModel.flakerInfos loadedModel.currentTime
