@@ -4,6 +4,7 @@
 module Main exposing (main)
 
 import Browser
+import Element exposing (layout)
 import FlakerInfo exposing (FlakerInfo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -100,4 +101,5 @@ view model =
 -}
 viewLoadedModel : LoadedModel -> Html a
 viewLoadedModel loadedModel =
-    FlakerInfo.viewFlakerInfoList loadedModel.flakerInfos loadedModel.currentTime
+    -- FlakerInfo.viewFlakerInfoList loadedModel.flakerInfos loadedModel.currentTime
+    FlakerInfo.createFlakerTable loadedModel.flakerInfos loadedModel.currentTime |> Element.layout []

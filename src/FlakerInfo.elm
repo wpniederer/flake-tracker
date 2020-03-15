@@ -1,6 +1,7 @@
-module FlakerInfo exposing (FlakerInfo, viewFlakerInfo, viewFlakerInfoList)
+module FlakerInfo exposing (FlakerInfo, createFlakerTable, viewFlakerInfo, viewFlakerInfoList)
 
 import Duration
+import Element exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List
@@ -44,13 +45,36 @@ viewFlakerInfo flakerInfo currentTime =
     in
     div
         []
-        [ h1 [] [ text <| "Time since " ++ flakerInfo.name ++ " last flaked:" ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.weeks, "week" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.days, "day" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.hours, "hour" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ) ]
-        , h1 [] [ text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ) ]
+        [ h1 [] [ Html.text <| "Time since " ++ flakerInfo.name ++ " last flaked:" ]
+        , h1 [] [ Html.text <| displayTimeComponent ( cumulativeDurations.weeks, "week" ) ]
+        , h1 [] [ Html.text <| displayTimeComponent ( cumulativeDurations.days, "day" ) ]
+        , h1 [] [ Html.text <| displayTimeComponent ( cumulativeDurations.hours, "hour" ) ]
+        , h1 [] [ Html.text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ) ]
+        , h1 [] [ Html.text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ) ]
         ]
+
+
+{-| Returns a detailed view of FlakerInfo for the given time, using elm-ui components.
+
+Currently only returns the time since last flake in seconds
+
+-}
+viewFlakerInfoElmUI : FlakerInfo -> Time.Posix -> Element a
+viewFlakerInfoElmUI flakerInfo currentTime =
+    let
+        flakeDuration =
+            Duration.from flakerInfo.lastFlakeTime currentTime
+
+        cumulativeDurations =
+            TimeUtil.cumulativeDurations flakeDuration
+    in
+    Element.el
+        []
+        (Duration.inSeconds flakeDuration
+            |> floor
+            |> String.fromInt
+            |> Element.text
+        )
 
 
 {-| Flips the first two arguments of a function.
@@ -70,3 +94,27 @@ viewFlakerInfoList flakerInfos currentTime =
             (li [] << List.singleton << flip viewFlakerInfo currentTime)
             flakerInfos
         )
+
+
+{-| Returns a table view of the List FlakerInfo for the given time.
+-}
+createFlakerTable : List FlakerInfo -> Time.Posix -> Element msg
+createFlakerTable flakerInfos currentTime =
+    Element.table
+        []
+        { data = flakerInfos
+        , columns =
+            [ { header = Element.text "Flaker Name"
+              , width = fill
+              , view =
+                    \flaker ->
+                        Element.text flaker.name
+              }
+            , { header = Element.text "Time Since Last Flaked"
+              , width = fill
+              , view =
+                    flip viewFlakerInfoElmUI
+                        currentTime
+              }
+            ]
+        }
