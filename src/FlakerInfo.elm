@@ -2,6 +2,9 @@ module FlakerInfo exposing (FlakerInfo, createFlakerTable, viewFlakerInfo, viewF
 
 import Duration
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import List
@@ -55,9 +58,6 @@ viewFlakerInfo flakerInfo currentTime =
 
 
 {-| Returns a detailed view of FlakerInfo for the given time, using elm-ui components.
-
-Currently only returns the time since last flake in seconds
-
 -}
 viewFlakerInfoElmUI : FlakerInfo -> Time.Posix -> Element a
 viewFlakerInfoElmUI flakerInfo currentTime =
@@ -68,13 +68,18 @@ viewFlakerInfoElmUI flakerInfo currentTime =
         cumulativeDurations =
             TimeUtil.cumulativeDurations flakeDuration
     in
-    Element.el
-        []
-        (Duration.inSeconds flakeDuration
-            |> floor
-            |> String.fromInt
-            |> Element.text
-        )
+    Element.column
+        [ paddingXY 5 2
+        , Element.width fill
+        , Border.widthEach { bottom = 1, top = 0, left = 1, right = 1 }
+        , spacingXY 0 2
+        ]
+        [ Element.el [] (Element.text <| displayTimeComponent ( cumulativeDurations.weeks, "week" ))
+        , Element.el [] (Element.text <| displayTimeComponent ( cumulativeDurations.days, "day" ))
+        , Element.el [] (Element.text <| displayTimeComponent ( cumulativeDurations.hours, "hour" ))
+        , Element.el [] (Element.text <| displayTimeComponent ( cumulativeDurations.minutes, "minute" ))
+        , Element.el [] (Element.text <| displayTimeComponent ( cumulativeDurations.seconds, "second" ))
+        ]
 
 
 {-| Flips the first two arguments of a function.
@@ -104,13 +109,33 @@ createFlakerTable flakerInfos currentTime =
         []
         { data = flakerInfos
         , columns =
-            [ { header = Element.text "Flaker Name"
+            [ { header =
+                    Element.el
+                        [ Font.bold
+                        , paddingXY 5 5
+                        , rgb255 92 99 118 |> Background.color
+                        , rgb255 255 255 2555 |> Font.color
+                        ]
+                        (Element.text "Flaker Name")
               , width = fill
               , view =
                     \flaker ->
-                        Element.text flaker.name
+                        Element.el
+                            [ rgb255 20 20 20 |> Border.color
+                            , paddingXY 5 5
+                            , Element.height (px 113)
+                            , Border.widthEach { bottom = 1, top = 0, left = 1, right = 0 }
+                            ]
+                            (Element.text flaker.name)
               }
-            , { header = Element.text "Time Since Last Flaked"
+            , { header =
+                    Element.el
+                        [ Font.bold
+                        , paddingXY 5 5
+                        , rgb255 255 99 118 |> Background.color
+                        , rgb255 255 255 2555 |> Font.color
+                        ]
+                        (Element.text "Time Since Last Flaked")
               , width = fill
               , view =
                     flip viewFlakerInfoElmUI
