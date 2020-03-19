@@ -4,7 +4,8 @@
 module Main exposing (main)
 
 import Browser
-import Element exposing (layout)
+import Element exposing (Element, el, layout)
+import Element.Font as Font
 import FlakerInfo exposing (FlakerInfo)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -84,7 +85,16 @@ subscriptions model =
 
 loadingMessage : Html a
 loadingMessage =
-    h1 [] [ text "Loading..." ]
+    Element.el
+        [ Font.size 30
+        , Font.family
+            [ Font.typeface "Helvetica"
+            , Font.sansSerif
+            ]
+        , Font.italic
+        ]
+        (Element.text "Loading...")
+        |> Element.layout []
 
 
 view : Model -> Html Msg
